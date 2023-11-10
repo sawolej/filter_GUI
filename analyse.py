@@ -554,13 +554,16 @@ def cut_me(data):
 
     edge_points_per_row = np.sum(edges != 0, axis=1)
 
+    # Calculate X as half the height of the data
+    minim  = data.shape[0] // 1.5
+
     # Sorting the edge lengths in descending order
     sorted_indices = np.argsort(edge_points_per_row)[::-1]
 
     # Finding two largest edge lengths that are separated by at least 10 pixels
     two_largest_indices = None
     for i in range(len(sorted_indices) - 1):
-        if abs(sorted_indices[i] - sorted_indices[i + 1]) >= 10:
+        if abs(sorted_indices[i] - sorted_indices[i + 1]) >= minim:
             two_largest_indices = [sorted_indices[i], sorted_indices[i + 1]]
             break
 
