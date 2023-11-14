@@ -499,7 +499,7 @@ def gimme_noise(orig, filtered):
     plt.subplot(1, 3, 3)
     plt.imshow(np.abs(nois), cmap='gray')
     plt.title('Szum')
-    plt.savefig(os.path.join('pics', 'noises.png'), transparent=True)
+    # plt.savefig(os.path.join('pics', 'noises.png'), transparent=True)
     #plt.show()
     plt.close()
 
