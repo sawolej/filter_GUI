@@ -473,11 +473,12 @@ def gimme_noise(orig, filtered):
     compute_percentage(orig, filtered)
     #save
 
-    plt.imshow(orig, cmap='gray')
+    plt.imshow(filtered, cmap='gray')
     plt.colorbar()
-    plt.title('original')
+    plt.title('filtered')
     #plt.show()
-
+    plt.savefig(os.path.join(output_folder, 'filtered.png'))
+    #plt.show()
     plt.imshow(filtered, cmap='gray')
     plt.colorbar()
     plt.title('filtered')

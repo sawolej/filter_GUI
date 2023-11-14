@@ -1,9 +1,20 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import traceback
 import analyse
 import filters
+import interactive
+import toSTL
+import numpy as np
 
 file_paths =[] 
+makeSTL = False
+
+def toggle_makeSTL():
+    global makeSTL
+    makeSTL = makeSTL_var.get()
+
+
 
 def run_analysis():
     for file_path in file_paths:
@@ -21,13 +32,22 @@ def run_analysis():
                 "phaseMreal": phaseMreal,
                 "imagMreal": imagMreal
             }
-
+           
             orig = data_dict[parameter]
-            filtered_H_freq = filters.filter_horizontal_freq(orig)
-            filtered_low_freq = filters.filter_frequency(filtered_H_freq, 'low')
+            if(makeSTL):
+                probe, background = interactive.select_area(orig)
+                filtered_H_freq = filters.pre_cut_filter_horizontal_freq(orig, background)
+                #filtered_low_freq = filters.pre_cut_filter_frequency(filtered_H_freq, 'low') #TBD
+                forSTL = np.where(~np.isnan(probe), filtered_H_freq, np.nan)
+                toSTL.makeSTL(forSTL, file_path)     
+            else:    
+                filtered_H_freq = filters.filter_horizontal_freq(orig)
+                filtered_low_freq = filters.filter_frequency(filtered_H_freq, 'low')
 
         except Exception as e:
-                 messagebox.showerror("Błąd", str(e))
+            error_info = traceback.format_exc()
+            messagebox.showerror("Błąd", f"Wystąpił wyjątek: {str(e)}\nSzczegóły: {error_info}")
+           
     messagebox.showinfo("Sukces", f"Done and done")
 
 def add_file():
@@ -42,9 +62,13 @@ def clear_files():
     file_paths.clear()  
     file_path_entry.delete(0, tk.END)  
     
-# Utworzenie okna głównego
 root = tk.Tk()
 root.title("Analiza MDMA")
+
+makeSTL_var = tk.BooleanVar(value=makeSTL)
+
+makeSTL_checkbox = tk.Checkbutton(root, text="'ja sam, ja sam', aka Make STL", var=makeSTL_var, command=toggle_makeSTL)
+makeSTL_checkbox.pack()
 
 file_path_entry = tk.Entry(root, width=50)
 file_path_entry.pack()
