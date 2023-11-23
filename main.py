@@ -22,7 +22,7 @@ def run_analysis():
 
         try:
             analyse.initialize_folders(file_path)
-            real_data, imag_data, magnitude, phase, phaseMreal, imagMreal, orig_phase, orig_magnitude, orig_real, orig_imag = analyse.go_get_them(file_path)
+            real_data, imag_data, magnitude, phase, phaseMreal, imagMreal, orig_phase, orig_magnitude, orig_real, orig_imag, combined = analyse.go_get_them(file_path)
         
             data_dict = {
                 "real": real_data,
@@ -30,7 +30,8 @@ def run_analysis():
                 "magnitude": magnitude,
                 "phase": phase,
                 "phaseMreal": phaseMreal,
-                "imagMreal": imagMreal
+                "imagMreal": imagMreal,
+                "combined": combined
             }
            
             orig = data_dict[parameter]
@@ -79,7 +80,7 @@ add_file_button.pack()
 clear_files_button = tk.Button(root, text="Wyczyść listę plików", command=clear_files)
 clear_files_button.pack()
 
-parameters = ["phase", "imag", "magnitude", "real", "phaseMreal", "imagMreal"]
+parameters = ["phase", "imag", "magnitude", "real", "phaseMreal", "imagMreal", "combined"]
 parameter_var = tk.StringVar(root)
 parameter_var.set(parameters[0]) 
 parameter_menu = tk.OptionMenu(root, parameter_var, *parameters)

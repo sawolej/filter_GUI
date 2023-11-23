@@ -104,6 +104,26 @@ def go_get_them(file_path):
     phase = (phase - np.min(phase)) / (np.max(phase) - np.min(phase))
     phaseMreal = phase - real_data
 
+    inverted_magnitude = 1 -  magnitude
+
+    weight_magnitude = 0.5
+    weight_phase = 0.5
+
+    weighted_magnitude = inverted_magnitude * weight_magnitude
+    weighted_phase = phase * weight_phase
+
+    combined_data = weighted_magnitude + weighted_phase
+
+    combined = (combined_data - np.min(combined_data)) / (np.max(combined_data) - np.min(combined_data))
+
+
+    plt.imshow(combined, cmap='gray')
+    plt.colorbar()
+    plt.title('combined')
+    plt.savefig(os.path.join(output_folder, 'combined.png'))
+    #plt.show()
+    plt.close()
+
     phaseMreal = (phaseMreal - np.min(phaseMreal)) / (np.max(phaseMreal) - np.min(phaseMreal))
     imagMreal = (imagMreal - np.min(imagMreal)) / (np.max(imagMreal) - np.min(imagMreal))
 
@@ -127,6 +147,9 @@ def go_get_them(file_path):
     real_df.to_csv(os.path.join(output_folder_num, 'real_data.csv'), index=False)
     real_df.to_excel(os.path.join(output_folder_num, 'real_data.xlsx'), index=False, engine='openpyxl')
 
+    combined_df = pd.DataFrame(combined)
+    combined_df.to_csv(os.path.join(output_folder_num, 'combined.csv'), index=False)
+    combined_df.to_excel(os.path.join(output_folder_num, 'phase_data.xlsx'), index=False, engine='openpyxl')
 
 
 
@@ -156,7 +179,7 @@ def go_get_them(file_path):
     fig.colorbar(img4, ax=ax4)
 
     plt.subplots_adjust(hspace=0.5)
-    plt.savefig(os.path.join(output_folder, '1god.png'), transparent=True)  # Zmiana na svg i zapis w folderze "pics"
+    plt.savefig(os.path.join(output_folder, '1god.png'))
     plt.close()
 
 
@@ -186,10 +209,10 @@ def go_get_them(file_path):
     fig.colorbar(img4, ax=ax4)
 
     plt.subplots_adjust(hspace=0.5)
-    plt.savefig(os.path.join(output_folder, '1bad.png'), transparent=True)
+    plt.savefig(os.path.join(output_folder, '1bad.png'))
     plt.close()
 
-    return real_data, imag_data, magnitude, phase, phaseMreal, imagMreal, orig_phase, orig_magnitude, orig_real, orig_imag
+    return real_data, imag_data, magnitude, phase, phaseMreal, imagMreal, orig_phase, orig_magnitude, orig_real, orig_imag, combined
 
 def FFT(data):
     F2D = np.fft.fft2(data)
@@ -556,7 +579,7 @@ def cut_me(data):
     edge_points_per_row = np.sum(edges != 0, axis=1)
 
     # Calculate X as half the height of the data
-    minim  = data.shape[0] // 1.5
+    minim  = data.shape[0] // 2.5
 
     # Sorting the edge lengths in descending order
     sorted_indices = np.argsort(edge_points_per_row)[::-1]
