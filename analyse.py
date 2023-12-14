@@ -5,7 +5,6 @@ import cv2
 import matplotlib.pyplot as plt
 
 
-
 # Zmienne globalne
 global output_folder_num
 global output_folder
@@ -268,8 +267,9 @@ def reverse_FFT(filtered_F2D_shifted):
     plt.imshow(reconstructed_image_real, cmap='gray')
     plt.colorbar()
     plt.title('filtered reverse FFT')
-    plt.savefig(os.path.join(output_folder, 'filtered.png'))
+    #plt.savefig(os.path.join(output_folder, 'filtered.png'))
     #plt.show()
+
     plt.close()
 
     return reconstructed_image_real
@@ -529,8 +529,6 @@ def gimme_noise(orig, filtered):
     signal_mean = np.std(orig)
     noise_std = np.std(filtered)
 
-
-
     if noise_std == 0:
         raise ValueError("Noise standard deviation is 0 why")
 
@@ -558,6 +556,58 @@ def subtract_disturbance(original, disturbance):
     subtracted = original - tiled_disturbance
 
     return subtracted
+
+def cut_me2(data):
+    """
+    Wykrywanie krawędzi próbki i tworzenie masek dla próbki i tła.
+    """
+    import numpy as np
+    import cv2
+    import matplotlib.pyplot as plt
+
+    data_uint8 = (data * 255).astype(np.uint8)
+    assert data_uint8.dtype == np.uint8, "Data type is not uint8"
+
+    _, binary = cv2.threshold(data_uint8, 200, 220, cv2.THRESH_BINARY)
+
+    # Closing operation
+    kernel = np.ones((5, 5), np.uint8)
+    closing = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+
+    edges = cv2.Canny(closing, 180, 200, apertureSize=7)
+
+    # Wypełnienie obszaru wewnątrz krawędzi
+    # Znalezienie punktu startowego (zwykle punkt na krawędzi)
+    # Zakładamy, że próbka jest w centralnej części obrazu
+    height, width = data.shape
+    start_point = (width // 2, height // 2)
+    filled_image = cv2.floodFill(closing, None, start_point, 255)[1]
+
+    # Tworzenie masek
+    mask_inside = filled_image == 255
+    mask_outside = ~mask_inside
+
+    # Zastosowanie masek do danych
+    data_with_mask_inside = np.where(mask_inside, data, np.nan)
+    data_with_mask_outside = np.where(mask_outside, data, np.nan)
+
+    # Wyświetlanie obrazów wynikowych
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(data_with_mask_inside, cmap='gray')
+    plt.title('Dane z Maską Próbki')
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(data_with_mask_outside, cmap='gray')
+    plt.title('Dane z Maską Tła')
+
+    plt.show()
+
+    return data_with_mask_inside, data_with_mask_outside
+# Przykładowe użycie:
+# data = TwojeDaneObrazu
+# inside, outside = cut_me(data)
 
 
 def cut_me(data):
@@ -785,9 +835,10 @@ def visualize_data(data1, data2, title1=" ", title2=" ", filename1='1.png', file
 
     plt.title(title2)
     plt.savefig(filename2)
-    plt.show()
+    #plt.show()
     plt.close()
 
+    return phase_color
 
 
 def experimantal_cut(data):
